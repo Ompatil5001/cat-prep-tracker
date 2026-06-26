@@ -14,13 +14,20 @@
 <script src="firebase-config.js"></script>
 </head>
 <body>
-<div class="app">
+<div class="app app-hidden" id="app-root">
 
 <!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
   <div class="sb-top">
     <p class="eyebrow">CAT 2026</p>
     <div class="brand">Prep <span>Tracker</span></div>
+  </div>
+
+  <!-- Signed-in user (Google profile pic + name) + Sign Out -->
+  <div class="user-row" id="user-row">
+    <img class="user-avatar" id="user-avatar" src="" alt="" referrerpolicy="no-referrer">
+    <div class="user-info"><p class="user-name" id="user-name">Signed in</p></div>
+    <button class="signout-btn" id="signout-btn" onclick="signOutUser()" title="Sign out">⏻</button>
   </div>
 
   <div class="ring-wrap">
@@ -198,6 +205,7 @@
 </div><!-- .right -->
 </div><!-- .app -->
 
+<script src="auth.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
