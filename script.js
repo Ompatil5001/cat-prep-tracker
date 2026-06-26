@@ -404,8 +404,12 @@ function renderDayPanel(dk){
 
   groups.forEach(g=>{
     const doneCount=data[g.key].filter(Boolean).length;
+    const allDone=doneCount===data[g.key].length;
     html+=`<div class="task-group">
-      <div class="task-group-head" style="color:${g.color}">${g.label} <span>${doneCount}/${data[g.key].length}</span></div>
+      <div class="task-group-head" style="color:${g.color}">
+        <span>${g.label} <span class="tg-count">${doneCount}/${data[g.key].length}</span></span>
+        <button class="tg-mark-all-btn" onclick="markAllGroup('${dk}','${g.key}')" style="border-color:${g.color}44;color:${g.color}">${allDone?"Unmark all":"Mark all"}</button>
+      </div>
       <div class="task-items">`;
     // for quant show 4-col mini layout
     if(g.key==="q"){
@@ -438,6 +442,14 @@ function renderDayPanel(dk){
 function toggleTask(dk,group,idx){
   initDay(dk);
   dailyData[dk][group][idx]=!dailyData[dk][group][idx];
+  saveAll();renderCalendar();
+}
+
+function markAllGroup(dk,group){
+  initDay(dk);
+  const arr=dailyData[dk][group];
+  const allDone=arr.every(Boolean);
+  dailyData[dk][group]=arr.map(()=>!allDone);
   saveAll();renderCalendar();
 }
 

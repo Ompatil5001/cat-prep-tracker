@@ -137,8 +137,11 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 
 /* Task groups */
 .task-group{margin-bottom:14px}
-.task-group-head{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
-.task-group-head span{opacity:.5;font-size:9px}
+.task-group-head{font-size:13px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.task-group-head>span{display:flex;align-items:center;gap:6px}
+.tg-count{opacity:.5;font-size:9px}
+.tg-mark-all-btn{font-size:11px;font-weight:600;font-family:inherit;letter-spacing:.05em;padding:3px 10px;border-radius:6px;border:1px solid;background:transparent;cursor:pointer;transition:opacity .15s;flex-shrink:0;text-transform:uppercase}
+.tg-mark-all-btn:hover{opacity:.75}
 .task-items{display:flex;flex-direction:column;gap:5px}
 .task-item{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:8px;background:var(--surface);border:0.5px solid transparent;cursor:pointer;transition:background .15s,border-color .15s}
 .task-item:hover{border-color:var(--border2)}
