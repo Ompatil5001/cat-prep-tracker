@@ -224,8 +224,8 @@
     <!-- Summary cards row -->
     <div class="mock-summary-row" id="mock-summary-row">
       <div class="mock-sum-card"><div class="mock-sum-num" id="ms-attempted">0</div><div class="mock-sum-lbl">Attempted</div></div>
-      <div class="mock-sum-card"><div class="mock-sum-num" id="ms-best-scaled" style="color:#a78bfa">—</div><div class="mock-sum-lbl">Best Scaled</div></div>
-      <div class="mock-sum-card"><div class="mock-sum-num" id="ms-avg-scaled" style="color:#34d399">—</div><div class="mock-sum-lbl">Avg Scaled</div></div>
+      <div class="mock-sum-card"><div class="mock-sum-num" id="ms-best-scaled" style="color:#a78bfa">—</div><div class="mock-sum-lbl">Best Score</div></div>
+      <div class="mock-sum-card"><div class="mock-sum-num" id="ms-avg-scaled" style="color:#34d399">—</div><div class="mock-sum-lbl">Avg Score</div></div>
       <div class="mock-sum-card"><div class="mock-sum-num" id="ms-best-pct" style="color:#f472b6">—</div><div class="mock-sum-lbl">Best %ile</div></div>
       <div class="mock-sum-card"><div class="mock-sum-num" id="ms-trend" style="color:#fbbf24">—</div><div class="mock-sum-lbl">Trend (last 5)</div></div>
     </div>
@@ -269,19 +269,19 @@
               </div>
             </div>
             <div class="mf-section-block">
-              <div class="mf-sec-head" style="color:#fb923c">DILR <span class="mf-sec-max">(20 Qs · max ~60)</span></div>
+              <div class="mf-sec-head" style="color:#fb923c">DILR <span class="mf-sec-max">(22 Qs · max ~66)</span></div>
               <div class="mf-input-row">
-                <div class="mf-field"><label>Correct</label><input type="number" class="mf-num" id="mf-dilr-c" min="0" max="20" placeholder="0" oninput="calcMockScores()"></div>
-                <div class="mf-field"><label>Wrong</label><input type="number" class="mf-num" id="mf-dilr-w" min="0" max="20" placeholder="0" oninput="calcMockScores()"></div>
+                <div class="mf-field"><label>Correct</label><input type="number" class="mf-num" id="mf-dilr-c" min="0" max="22" placeholder="0" oninput="calcMockScores()"></div>
+                <div class="mf-field"><label>Wrong</label><input type="number" class="mf-num" id="mf-dilr-w" min="0" max="22" placeholder="0" oninput="calcMockScores()"></div>
                 <div class="mf-field mf-calc"><label>Raw Score</label><div class="mf-calc-val" id="mf-dilr-raw">—</div></div>
                 <div class="mf-field mf-calc"><label>%ile (est)</label><div class="mf-calc-val" id="mf-dilr-pct">—</div></div>
               </div>
             </div>
             <div class="mf-section-block">
-              <div class="mf-sec-head" style="color:#a78bfa">QA <span class="mf-sec-max">(32 Qs · max ~96)</span></div>
+              <div class="mf-sec-head" style="color:#a78bfa">QA <span class="mf-sec-max">(22 Qs · max ~66)</span></div>
               <div class="mf-input-row">
-                <div class="mf-field"><label>Correct</label><input type="number" class="mf-num" id="mf-qa-c" min="0" max="32" placeholder="0" oninput="calcMockScores()"></div>
-                <div class="mf-field"><label>Wrong</label><input type="number" class="mf-num" id="mf-qa-w" min="0" max="32" placeholder="0" oninput="calcMockScores()"></div>
+                <div class="mf-field"><label>Correct</label><input type="number" class="mf-num" id="mf-qa-c" min="0" max="22" placeholder="0" oninput="calcMockScores()"></div>
+                <div class="mf-field"><label>Wrong</label><input type="number" class="mf-num" id="mf-qa-w" min="0" max="22" placeholder="0" oninput="calcMockScores()"></div>
                 <div class="mf-field mf-calc"><label>Raw Score</label><div class="mf-calc-val" id="mf-qa-raw">—</div></div>
                 <div class="mf-field mf-calc"><label>%ile (est)</label><div class="mf-calc-val" id="mf-qa-pct">—</div></div>
               </div>
@@ -291,7 +291,7 @@
           <div class="mf-total-bar">
             <div class="mf-total-item"><span class="mf-total-lbl">Total Raw</span><span class="mf-total-val" id="mf-total-raw">—</span></div>
             <div class="mf-total-sep"></div>
-            <div class="mf-total-item"><span class="mf-total-lbl">Scaled /300</span><span class="mf-total-val" id="mf-total-scaled" style="color:#a78bfa;font-size:20px">—</span></div>
+            <div class="mf-total-item"><span class="mf-total-lbl">Total Score</span><span class="mf-total-val" id="mf-total-scaled" style="color:#a78bfa;font-size:20px">—</span></div>
             <div class="mf-total-sep"></div>
             <div class="mf-total-item"><span class="mf-total-lbl">Est. Overall %ile</span><span class="mf-total-val" id="mf-total-pct" style="color:#f472b6;font-size:20px">—</span></div>
           </div>

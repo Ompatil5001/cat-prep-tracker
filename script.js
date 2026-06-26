@@ -556,50 +556,54 @@ function renderReadingLog(){
    MOCK LOG
 ══════════════════════════════════ */
 
-// Percentile lookup tables (from Excel's Percentile Guide sheet)
+// Percentile lookup tables — CAT 2026 actual data (Slot 1)
+// VARC: 24 Qs | max raw ~72
 const VARC_PCTL=[
-  {min:60,pct:"99+"},
-  {min:52,pct:"97–98"},
-  {min:45,pct:"95–96"},
-  {min:38,pct:"90–94"},
-  {min:30,pct:"85–89"},
-  {min:22,pct:"75–84"},
-  {min:15,pct:"65–74"},
-  {min:8,pct:"50–64"},
-  {min:0,pct:"<50"}
+  {min:51,pct:"99.9"},
+  {min:44,pct:"99.5"},
+  {min:40,pct:"99"},
+  {min:34,pct:"98"},
+  {min:30,pct:"95"},
+  {min:23,pct:"90"},
+  {min:19,pct:"85"},
+  {min:17,pct:"80"},
+  {min:0,pct:"<80"}
 ];
+// DILR: 22 Qs | max raw ~66
 const DILR_PCTL=[
-  {min:50,pct:"99+"},
-  {min:42,pct:"97–98"},
-  {min:35,pct:"95–96"},
-  {min:28,pct:"90–94"},
-  {min:21,pct:"85–89"},
-  {min:15,pct:"75–84"},
-  {min:9,pct:"65–74"},
-  {min:3,pct:"50–64"},
-  {min:0,pct:"<50"}
+  {min:46,pct:"99.9"},
+  {min:39,pct:"99.5"},
+  {min:34,pct:"99"},
+  {min:31,pct:"98"},
+  {min:26,pct:"95"},
+  {min:19,pct:"90"},
+  {min:15,pct:"85"},
+  {min:13,pct:"80"},
+  {min:0,pct:"<80"}
 ];
+// QA: 22 Qs | max raw ~66
 const QA_PCTL=[
-  {min:80,pct:"99+"},
-  {min:68,pct:"97–98"},
-  {min:57,pct:"95–96"},
-  {min:46,pct:"90–94"},
-  {min:36,pct:"85–89"},
-  {min:26,pct:"75–84"},
-  {min:17,pct:"65–74"},
-  {min:8,pct:"50–64"},
-  {min:0,pct:"<50"}
+  {min:48,pct:"99.9"},
+  {min:40,pct:"99.5"},
+  {min:33,pct:"99"},
+  {min:30,pct:"98"},
+  {min:25,pct:"95"},
+  {min:18,pct:"90"},
+  {min:16,pct:"85"},
+  {min:14,pct:"80"},
+  {min:0,pct:"<80"}
 ];
+// Overall scaled /228 → percentile (CAT 2026 Slot 1)
 const OVERALL_PCTL=[
-  {min:250,pct:"99+"},
-  {min:225,pct:"97–98"},
-  {min:200,pct:"95–96"},
-  {min:175,pct:"90–94"},
-  {min:150,pct:"85–89"},
-  {min:120,pct:"75–84"},
-  {min:90,pct:"65–74"},
-  {min:60,pct:"50–64"},
-  {min:0,pct:"<50"}
+  {min:122,pct:"99.9"},
+  {min:103,pct:"99.5"},
+  {min:90,pct:"99"},
+  {min:81,pct:"98"},
+  {min:70,pct:"95"},
+  {min:53,pct:"90"},
+  {min:45,pct:"85"},
+  {min:40,pct:"80"},
+  {min:0,pct:"<80"}
 ];
 
 function lookupPctile(table,raw){
@@ -614,9 +618,8 @@ function calcRaw(c,w){
 }
 
 function rawToScaled300(varcRaw,dilrRaw,qaRaw){
-  // Approximate: max raw = 72+60+96 = 228; scale to 300
-  const total=varcRaw+dilrRaw+qaRaw;
-  return Math.round((total/228)*300);
+  // CAT 2026: max raw = 72+66+66 = 204; overall percentile lookup uses total raw directly
+  return varcRaw+dilrRaw+qaRaw;
 }
 
 function calcMockScores(){
