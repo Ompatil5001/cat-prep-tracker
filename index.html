@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CAT Prep Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sb-top">
+    <p class="eyebrow">CAT 2026</p>
+    <div class="brand">Prep <span>Tracker</span></div>
+  </div>
+
+  <div class="ring-wrap">
+    <svg width="58" height="58" viewBox="0 0 58 58" style="flex-shrink:0">
+      <defs><linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" stop-color="#a78bfa"/><stop offset="100%" stop-color="#f472b6"/>
+      </linearGradient></defs>
+      <circle class="ring-track" cx="29" cy="29" r="26"/>
+      <circle class="ring-prog" id="ring-prog" cx="29" cy="29" r="26"/>
+      <text class="ring-label" x="29" y="27" id="ring-pct">0%</text>
+      <text class="ring-sub" x="29" y="37">topics</text>
+    </svg>
+    <div class="ring-stats">
+      <p><b id="stat-done">0</b> done</p>
+      <p><b id="stat-left">52</b> left</p>
+      <p><b>22</b> max Qs</p>
+    </div>
+  </div>
+
+  <!-- Main nav -->
+  <div class="main-nav">
+    <button class="main-nav-btn active" id="mnav-quant" onclick="setPage('quant')"><span class="ico">📐</span>Quant Topics</button>
+    <button class="main-nav-btn" id="mnav-daily" onclick="setPage('daily')"><span class="ico">📅</span>Daily Tasks</button>
+    <button class="main-nav-btn" id="mnav-reading" onclick="setPage('reading')"><span class="ico">📖</span>Reading Log</button>
+  </div>
+
+  <!-- Quant section list (shown only on quant page) -->
+  <nav class="sec-nav" id="sec-nav"></nav>
+
+  <div class="backup-row">
+    <button class="reset-btn" onclick="exportBackup()" title="Download a backup JSON file">⬇ Backup</button>
+    <button class="reset-btn" onclick="document.getElementById('import-file').click()" title="Restore from a backup JSON file">⬆ Restore</button>
+    <input type="file" id="import-file" accept="application/json" style="display:none" onchange="importBackupFile(this.files[0]); this.value='';">
+  </div>
+  <div class="sb-footer">
+    <span id="save-status" class="total-lbl" style="color:var(--muted)">Loading…</span>
+    <button class="reset-btn" onclick="resetAll()">Reset topics</button>
+  </div>
+</aside>
+
+<!-- ══ RIGHT ══ -->
+<div class="right">
+
+  <!-- ── QUANT PAGE ── -->
+  <div class="page active" id="page-quant">
+    <div class="ph">
+      <div>
+        <div class="ph-left">
+          <div class="ph-dot" id="panel-dot"></div>
+          <h1 class="ph-title" id="panel-title">Arithmetic</h1>
+        </div>
+        <div class="ph-pills" id="panel-pills"></div>
+      </div>
+      <button class="action-btn" id="mark-all-btn" onclick="selectAllActive()">Mark all done</button>
+    </div>
+    <div class="prog-row">
+      <div class="prog-track"><div class="prog-fill" id="sec-prog-fill"></div></div>
+      <span class="prog-lbl" id="sec-prog-label">0 / 10</span>
+      <span class="prog-pct" id="sec-prog-pct">0%</span>
+    </div>
+    <div class="topics-wrap"><div class="topics-grid" id="topics-grid"></div></div>
+  </div>
+
+  <!-- ── DAILY TASKS PAGE ── -->
+  <div class="page" id="page-daily">
+    <div class="ph">
+      <div class="ph-left">
+        <div class="ph-dot" style="background:#a78bfa;box-shadow:0 0 8px #a78bfa40"></div>
+        <h1 class="ph-title">Daily Tasks</h1>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:13px;color:var(--muted)">20 Quant · 5 RC · 5 DILR</span>
+      </div>
+    </div>
+    <div class="daily-layout">
+      <!-- Calendar -->
+      <div class="cal-side">
+        <div class="cal-nav">
+          <button class="cal-arrow" onclick="changeMonth(-1)">&#8249;</button>
+          <span class="cal-month" id="cal-month-label"></span>
+          <button class="cal-arrow" onclick="changeMonth(1)">&#8250;</button>
+        </div>
+        <div class="cal-wrap">
+          <div class="cal-days-header">
+            <div class="cal-day-lbl">Sun</div><div class="cal-day-lbl">Mon</div>
+            <div class="cal-day-lbl">Tue</div><div class="cal-day-lbl">Wed</div>
+            <div class="cal-day-lbl">Thu</div><div class="cal-day-lbl">Fri</div>
+            <div class="cal-day-lbl">Sat</div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div class="streak-bar">
+          <div class="streak-item">🔥 <b id="streak-count">0</b>&nbsp;day streak</div>
+          <div class="streak-item">✅ <b id="perfect-days">0</b>&nbsp;perfect days</div>
+          <div class="streak-item">📆 <b id="active-days">0</b>&nbsp;active days</div>
+        </div>
+      </div>
+      <!-- Day detail -->
+      <div class="day-side">
+        <div class="day-header">
+          <div class="day-date" id="day-date-title">Today</div>
+          <div class="day-sub" id="day-date-sub">Select a day to see tasks</div>
+        </div>
+        <div class="tasks-scroll" id="tasks-scroll"></div>
+        <div class="day-prog">
+          <div class="day-prog-row">
+            <span>Day progress</span>
+            <span id="day-prog-txt">0 / 30</span>
+          </div>
+          <div class="day-prog-track"><div class="day-prog-fill" id="day-prog-fill"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── READING LOG PAGE ── -->
+  <div class="page" id="page-reading">
+    <div class="ph">
+      <div class="ph-left">
+        <div class="ph-dot" style="background:#34d399;box-shadow:0 0 8px #34d39940"></div>
+        <h1 class="ph-title">Reading Log</h1>
+      </div>
+      <span style="font-size:13px;color:var(--muted)">Aeon · Essays · Articles</span>
+    </div>
+    <div class="reading-layout">
+      <div class="reading-main">
+        <div class="reading-scroll" id="reading-scroll">
+          <!-- Add entry -->
+          <div class="add-entry">
+            <div class="add-entry-title">Log a reading</div>
+            <div class="entry-fields">
+              <input class="entry-input" id="re-title" placeholder="Article / essay title" />
+              <div class="entry-row">
+                <input class="entry-input" id="re-url" placeholder="Aeon URL (optional)" style="flex:2"/>
+                <select class="entry-select" id="re-tag" style="flex:1">
+                  <option value="Philosophy">Philosophy</option>
+                  <option value="Science">Science</option>
+                  <option value="Psychology">Psychology</option>
+                  <option value="Society">Society</option>
+                  <option value="History">History</option>
+                  <option value="Technology">Technology</option>
+                  <option value="Arts">Arts</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <textarea class="entry-textarea" id="re-notes" placeholder="Key ideas, vocab, or notes for RC practice…"></textarea>
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <span style="font-size:13px;color:var(--muted)">Reading logged for today</span>
+                <button class="entry-submit" onclick="addReadingEntry()">+ Log Reading</button>
+              </div>
+            </div>
+          </div>
+          <!-- entries -->
+          <div class="entries-list" id="entries-list"></div>
+        </div>
+      </div>
+      <div class="reading-sidebar">
+        <div class="rs-head">📊 Reading Stats</div>
+        <div class="rs-scroll">
+          <div class="rs-stat"><div class="rs-stat-num" id="rs-total">0</div><div class="rs-stat-lbl">Articles read</div></div>
+          <div class="rs-stat"><div class="rs-stat-num" id="rs-this-month">0</div><div class="rs-stat-lbl">This month</div></div>
+          <div class="rs-stat"><div class="rs-stat-num" id="rs-streak">0</div><div class="rs-stat-lbl">Reading streak (days)</div></div>
+          <div class="rs-tags-head">By category</div>
+          <div id="rs-tags"></div>
+          <div class="monthly-heatmap">
+            <div class="mh-head">This month</div>
+            <div class="mh-grid" id="mh-grid"></div>
+            <div class="mh-lbl">Less → More</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- .right -->
+</div><!-- .app -->
+
+<script src="script.js"></script>
+</body>
+</html>
