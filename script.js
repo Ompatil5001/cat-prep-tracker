@@ -33,8 +33,11 @@ const TOTAL=SECTIONS.reduce((a,s)=>a+s.topics.length,0);
 let qState={},activeId="arith";
 let dailyData={};   // { "YYYY-MM-DD": { q:[bool*20], rc:[bool*5], dilr:[bool*5] } }
 let readingData=[];  // [{id,date,title,url,tag,notes}]
+let mockData={};    // { "1": {date,varc_c,varc_w,dilr_c,dilr_w,qa_c,qa_w,notes} ... }
 let calYear,calMonth,selDate;
 let currentPage="quant";
+let activeMockNum=null;
+let mockFilter="all";
 
 SECTIONS.forEach(s=>s.topics.forEach((_,i)=>qState[s.id+"_"+i]=false));
 
@@ -46,7 +49,7 @@ SECTIONS.forEach(s=>s.topics.forEach((_,i)=>qState[s.id+"_"+i]=false));
    2) lets you export everything to a JSON file you can keep safe, and
       re-import later via the Backup menu in the sidebar.
 */
-const LS_KEYS={q:"cat_q_v4",daily:"cat_daily_v4",read:"cat_read_v4"};
+const LS_KEYS={q:"cat_q_v4",daily:"cat_daily_v4",read:"cat_read_v4",mocks:"cat_mocks_v4"};
 const LS_BACKUP_KEY="cat_backup_v4";
 let _saveTimer=null;
 let _saveStatusEl=null;
@@ -66,9 +69,10 @@ function _doSaveAll(){
     localStorage.setItem(LS_KEYS.q,JSON.stringify(qState));
     localStorage.setItem(LS_KEYS.daily,JSON.stringify(dailyData));
     localStorage.setItem(LS_KEYS.read,JSON.stringify(readingData));
+    localStorage.setItem(LS_KEYS.mocks,JSON.stringify(mockData));
     // rolling backup blob, separate key, so one corrupted key doesn't lose everything
     localStorage.setItem(LS_BACKUP_KEY,JSON.stringify({
-      q:qState,daily:dailyData,read:readingData,savedAt:new Date().toISOString()
+      q:qState,daily:dailyData,read:readingData,mocks:mockData,savedAt:new Date().toISOString()
     }));
     _setSaveStatus("Saved ✓",false);
     _cloudPush();
@@ -82,9 +86,11 @@ function loadAll(){
     const q=localStorage.getItem(LS_KEYS.q);
     const d=localStorage.getItem(LS_KEYS.daily);
     const r=localStorage.getItem(LS_KEYS.read);
+    const m=localStorage.getItem(LS_KEYS.mocks);
     if(q){const p=JSON.parse(q);Object.keys(p).forEach(k=>{if(k in qState)qState[k]=p[k];});}
     if(d)dailyData=JSON.parse(d);
     if(r)readingData=JSON.parse(r);
+    if(m)mockData=JSON.parse(m);
     // if the main keys are missing/empty but a backup blob exists, restore from it
     if(!q&&!d&&!r){
       const b=localStorage.getItem(LS_BACKUP_KEY);
@@ -93,6 +99,7 @@ function loadAll(){
         if(p.q)Object.keys(p.q).forEach(k=>{if(k in qState)qState[k]=p.q[k];});
         if(p.daily)dailyData=p.daily;
         if(p.read)readingData=p.read;
+        if(p.mocks)mockData=p.mocks;
         _setSaveStatus("Restored from backup",false);
         return;
       }
@@ -149,10 +156,12 @@ async function _cloudPullIfNeeded(){
       if(p.q)Object.keys(p.q).forEach(k=>{if(k in qState)qState[k]=p.q[k];});
       if(p.daily)dailyData=p.daily;
       if(p.read)readingData=p.read;
+      if(p.mocks)mockData=p.mocks;
       _doSaveAll();
       renderNav();updatePanel();updateGlobal();
       if(currentPage==="daily")renderCalendar();
       if(currentPage==="reading")renderReadingLog();
+      if(currentPage==="mocks")renderMockList();
       _setSaveStatus("Restored from cloud ✓",false);
     }
   }catch(e){
@@ -164,7 +173,7 @@ async function _cloudPush(){
   if(!_cloudReady||!_uid)return;
   try{
     await db.collection("trackers").doc(_uid).set({
-      q:qState,daily:dailyData,read:readingData,savedAt:new Date().toISOString()
+      q:qState,daily:dailyData,read:readingData,mocks:mockData,savedAt:new Date().toISOString()
     });
   }catch(e){
     console.error("cloud push failed",e);
@@ -173,7 +182,7 @@ async function _cloudPush(){
 
 /* ── Export / Import (file backup) ── */
 function exportBackup(){
-  const payload={q:qState,daily:dailyData,read:readingData,exportedAt:new Date().toISOString()};
+  const payload={q:qState,daily:dailyData,read:readingData,mocks:mockData,exportedAt:new Date().toISOString()};
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
   const url=URL.createObjectURL(blob);
   const a=document.createElement("a");
@@ -195,10 +204,12 @@ function importBackupFile(file){
       if(p.q)Object.keys(p.q).forEach(k=>{if(k in qState)qState[k]=p.q[k];});
       if(p.daily)dailyData=p.daily;
       if(p.read)readingData=p.read;
+      if(p.mocks)mockData=p.mocks;
       saveAll();
       renderNav();updatePanel();updateGlobal();
       if(currentPage==="daily")renderCalendar();
       if(currentPage==="reading")renderReadingLog();
+      if(currentPage==="mocks")renderMockList();
       _setSaveStatus("Backup imported ✓",false);
       alert("Backup imported successfully.");
     }catch(err){
@@ -208,11 +219,9 @@ function importBackupFile(file){
   };
   reader.readAsText(file);
 }
-
 /* ── Page nav ── */
 function setPage(p){
   currentPage=p;
-  localStorage.setItem('cat_page',p);
   document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));
   document.getElementById("page-"+p).classList.add("active");
   document.querySelectorAll(".main-nav-btn").forEach(el=>el.classList.remove("active"));
@@ -220,6 +229,7 @@ function setPage(p){
   document.getElementById("sec-nav").style.display=p==="quant"?"block":"none";
   if(p==="daily") renderCalendar();
   if(p==="reading") renderReadingLog();
+  if(p==="mocks") renderMockList();
 }
 
 /* ══════════════════════════════════
@@ -542,15 +552,248 @@ function renderReadingLog(){
   document.getElementById("mh-grid").innerHTML=hm;
 }
 
-/* ── CAT Exam Countdown ── */
-function updateCountdown(){
-  const exam=new Date('2026-11-29T00:00:00');
-  const now=new Date();
-  const diff=exam-now;
-  const el=document.getElementById('cd-days');
-  if(!el)return;
-  if(diff<=0){el.textContent='🎯';return;}
-  el.textContent=Math.ceil(diff/(1000*60*60*24));
+/* ══════════════════════════════════
+   MOCK LOG
+══════════════════════════════════ */
+
+// Percentile lookup tables (from Excel's Percentile Guide sheet)
+const VARC_PCTL=[
+  {min:60,pct:"99+"},
+  {min:52,pct:"97–98"},
+  {min:45,pct:"95–96"},
+  {min:38,pct:"90–94"},
+  {min:30,pct:"85–89"},
+  {min:22,pct:"75–84"},
+  {min:15,pct:"65–74"},
+  {min:8,pct:"50–64"},
+  {min:0,pct:"<50"}
+];
+const DILR_PCTL=[
+  {min:50,pct:"99+"},
+  {min:42,pct:"97–98"},
+  {min:35,pct:"95–96"},
+  {min:28,pct:"90–94"},
+  {min:21,pct:"85–89"},
+  {min:15,pct:"75–84"},
+  {min:9,pct:"65–74"},
+  {min:3,pct:"50–64"},
+  {min:0,pct:"<50"}
+];
+const QA_PCTL=[
+  {min:80,pct:"99+"},
+  {min:68,pct:"97–98"},
+  {min:57,pct:"95–96"},
+  {min:46,pct:"90–94"},
+  {min:36,pct:"85–89"},
+  {min:26,pct:"75–84"},
+  {min:17,pct:"65–74"},
+  {min:8,pct:"50–64"},
+  {min:0,pct:"<50"}
+];
+const OVERALL_PCTL=[
+  {min:250,pct:"99+"},
+  {min:225,pct:"97–98"},
+  {min:200,pct:"95–96"},
+  {min:175,pct:"90–94"},
+  {min:150,pct:"85–89"},
+  {min:120,pct:"75–84"},
+  {min:90,pct:"65–74"},
+  {min:60,pct:"50–64"},
+  {min:0,pct:"<50"}
+];
+
+function lookupPctile(table,raw){
+  if(raw===null||raw===undefined||isNaN(raw))return "—";
+  for(const row of table){if(raw>=row.min)return row.pct;}
+  return "<50";
+}
+
+function calcRaw(c,w){
+  const cv=parseInt(c)||0, wv=parseInt(w)||0;
+  return (cv*3)-(wv*1);
+}
+
+function rawToScaled300(varcRaw,dilrRaw,qaRaw){
+  // Approximate: max raw = 72+60+96 = 228; scale to 300
+  const total=varcRaw+dilrRaw+qaRaw;
+  return Math.round((total/228)*300);
+}
+
+function calcMockScores(){
+  const vc=document.getElementById("mf-varc-c").value;
+  const vw=document.getElementById("mf-varc-w").value;
+  const dc=document.getElementById("mf-dilr-c").value;
+  const dw=document.getElementById("mf-dilr-w").value;
+  const qc=document.getElementById("mf-qa-c").value;
+  const qw=document.getElementById("mf-qa-w").value;
+
+  const vRaw=calcRaw(vc,vw);
+  const dRaw=calcRaw(dc,dw);
+  const qRaw=calcRaw(qc,qw);
+
+  const hasV=vc||vw, hasD=dc||dw, hasQ=qc||qw;
+
+  document.getElementById("mf-varc-raw").textContent=hasV?vRaw:"—";
+  document.getElementById("mf-dilr-raw").textContent=hasD?dRaw:"—";
+  document.getElementById("mf-qa-raw").textContent=hasQ?qRaw:"—";
+  document.getElementById("mf-varc-pct").textContent=hasV?lookupPctile(VARC_PCTL,vRaw):"—";
+  document.getElementById("mf-dilr-pct").textContent=hasD?lookupPctile(DILR_PCTL,dRaw):"—";
+  document.getElementById("mf-qa-pct").textContent=hasQ?lookupPctile(QA_PCTL,qRaw):"—";
+
+  if(hasV&&hasD&&hasQ){
+    const totalRaw=vRaw+dRaw+qRaw;
+    const scaled=rawToScaled300(vRaw,dRaw,qRaw);
+    document.getElementById("mf-total-raw").textContent=totalRaw;
+    document.getElementById("mf-total-scaled").textContent=scaled;
+    document.getElementById("mf-total-pct").textContent=lookupPctile(OVERALL_PCTL,scaled);
+  } else {
+    document.getElementById("mf-total-raw").textContent="—";
+    document.getElementById("mf-total-scaled").textContent="—";
+    document.getElementById("mf-total-pct").textContent="—";
+  }
+}
+
+function openMockForm(num){
+  activeMockNum=num;
+  document.getElementById("mock-detail-placeholder").style.display="none";
+  const form=document.getElementById("mock-entry-form");
+  form.style.display="flex";
+  document.getElementById("mock-form-title").textContent=`Mock #${num}`;
+
+  const existing=mockData[num];
+  document.getElementById("mf-date").value=existing?existing.date:todayStr();
+  document.getElementById("mf-varc-c").value=existing?existing.varc_c:"";
+  document.getElementById("mf-varc-w").value=existing?existing.varc_w:"";
+  document.getElementById("mf-dilr-c").value=existing?existing.dilr_c:"";
+  document.getElementById("mf-dilr-w").value=existing?existing.dilr_w:"";
+  document.getElementById("mf-qa-c").value=existing?existing.qa_c:"";
+  document.getElementById("mf-qa-w").value=existing?existing.qa_w:"";
+  document.getElementById("mf-notes").value=existing?existing.notes:"";
+  calcMockScores();
+
+  // highlight selected row
+  document.querySelectorAll(".mock-row").forEach(r=>r.classList.remove("active"));
+  const row=document.getElementById("mock-row-"+num);
+  if(row)row.classList.add("active");
+}
+
+function saveMockEntry(){
+  if(!activeMockNum)return;
+  const vc=document.getElementById("mf-varc-c").value;
+  const vw=document.getElementById("mf-varc-w").value;
+  const dc=document.getElementById("mf-dilr-c").value;
+  const dw=document.getElementById("mf-dilr-w").value;
+  const qc=document.getElementById("mf-qa-c").value;
+  const qw=document.getElementById("mf-qa-w").value;
+
+  mockData[activeMockNum]={
+    date:document.getElementById("mf-date").value||todayStr(),
+    varc_c:parseInt(vc)||0, varc_w:parseInt(vw)||0,
+    dilr_c:parseInt(dc)||0, dilr_w:parseInt(dw)||0,
+    qa_c:parseInt(qc)||0, qa_w:parseInt(qw)||0,
+    notes:document.getElementById("mf-notes").value.trim()
+  };
+  saveAll();
+  renderMockList();
+  // re-highlight after re-render
+  const row=document.getElementById("mock-row-"+activeMockNum);
+  if(row)row.classList.add("active");
+  _setSaveStatus("Mock #"+activeMockNum+" saved ✓",false);
+}
+
+function setMockFilter(f,btn){
+  mockFilter=f;
+  document.querySelectorAll(".mock-filter-btn").forEach(b=>b.classList.remove("active"));
+  if(btn)btn.classList.add("active");
+  renderMockList();
+}
+
+function renderMockList(){
+  const attempted=Object.keys(mockData).length;
+  document.getElementById("mock-counter").textContent=`${attempted} / 40 attempted`;
+  document.getElementById("ms-attempted").textContent=attempted;
+
+  // compute stats
+  const entries=Object.entries(mockData);
+  if(entries.length){
+    const scaleds=entries.map(([,m])=>{
+      const vr=calcRaw(m.varc_c,m.varc_w);
+      const dr=calcRaw(m.dilr_c,m.dilr_w);
+      const qr=calcRaw(m.qa_c,m.qa_w);
+      return rawToScaled300(vr,dr,qr);
+    });
+    scaleds.sort((a,b)=>b-a);
+    document.getElementById("ms-best-scaled").textContent=scaleds[0];
+    document.getElementById("ms-avg-scaled").textContent=Math.round(scaleds.reduce((a,b)=>a+b,0)/scaleds.length);
+    document.getElementById("ms-best-pct").textContent=lookupPctile(OVERALL_PCTL,scaleds[0]);
+    if(scaleds.length>=2){
+      // trend: avg of last 5 sorted by mock number vs overall avg
+      const last5=entries
+        .sort((a,b)=>parseInt(a[0])-parseInt(b[0]))
+        .slice(-5)
+        .map(([,m])=>rawToScaled300(calcRaw(m.varc_c,m.varc_w),calcRaw(m.dilr_c,m.dilr_w),calcRaw(m.qa_c,m.qa_w)));
+      const l5avg=Math.round(last5.reduce((a,b)=>a+b,0)/last5.length);
+      const allAvg=Math.round(scaleds.reduce((a,b)=>a+b,0)/scaleds.length);
+      const diff=l5avg-allAvg;
+      document.getElementById("ms-trend").textContent=(diff>=0?"+":"")+diff;
+      document.getElementById("ms-trend").style.color=diff>=0?"#34d399":"#fb923c";
+    } else {
+      document.getElementById("ms-trend").textContent="—";
+    }
+  } else {
+    ["ms-best-scaled","ms-avg-scaled","ms-best-pct","ms-trend"].forEach(id=>{
+      document.getElementById(id).textContent="—";
+    });
+    document.getElementById("ms-trend").style.color="";
+  }
+
+  // render list rows
+  let html="";
+  for(let i=1;i<=40;i++){
+    const m=mockData[i];
+    const done=!!m;
+    if(mockFilter==="done"&&!done)continue;
+    if(mockFilter==="pending"&&done)continue;
+
+    if(done){
+      const vr=calcRaw(m.varc_c,m.varc_w);
+      const dr=calcRaw(m.dilr_c,m.dilr_w);
+      const qr=calcRaw(m.qa_c,m.qa_w);
+      const scaled=rawToScaled300(vr,dr,qr);
+      const pct=lookupPctile(OVERALL_PCTL,scaled);
+      const dateStr=m.date?new Date(m.date+"T00:00:00").toLocaleDateString("en-IN",{day:"numeric",month:"short"}):"";
+      html+=`<div class="mock-row done" id="mock-row-${i}" onclick="openMockForm(${i})">
+        <div class="mock-row-num">${i}</div>
+        <div class="mock-row-info">
+          <div class="mock-row-title">Mock #${i}<span class="mock-row-date">${dateStr}</span></div>
+          <div class="mock-row-scores">
+            <span class="mock-score-chip varc">VARC: ${vr}</span>
+            <span class="mock-score-chip dilr">DILR: ${dr}</span>
+            <span class="mock-score-chip qa">QA: ${qr}</span>
+          </div>
+        </div>
+        <div class="mock-row-right">
+          <div class="mock-row-scaled">${scaled}</div>
+          <div class="mock-row-pct">${pct}</div>
+        </div>
+      </div>`;
+    } else {
+      html+=`<div class="mock-row pending" id="mock-row-${i}" onclick="openMockForm(${i})">
+        <div class="mock-row-num muted">${i}</div>
+        <div class="mock-row-info">
+          <div class="mock-row-title">Mock #${i}<span class="mock-row-status">Pending</span></div>
+        </div>
+        <div class="mock-row-right"><div class="mock-row-enter">+ Enter →</div></div>
+      </div>`;
+    }
+  }
+  document.getElementById("mock-list-scroll").innerHTML=html||`<div style="text-align:center;color:var(--muted);padding:32px;font-size:13px">No mocks match this filter.</div>`;
+
+  // re-highlight active if still visible
+  if(activeMockNum){
+    const row=document.getElementById("mock-row-"+activeMockNum);
+    if(row)row.classList.add("active");
+  }
 }
 
 /* ── INIT ── */
@@ -561,10 +804,7 @@ function updateCountdown(){
   renderNav();
   updatePanel();
   updateGlobal();
-  const savedPage=localStorage.getItem('cat_page');
-  setPage(savedPage&&['quant','daily','reading'].includes(savedPage)?savedPage:'quant');
+  setPage("quant");
   _setSaveStatus("Loaded",false);
-  updateCountdown();
-  setInterval(updateCountdown,60*60*1000);
   _cloudInit();
 })();

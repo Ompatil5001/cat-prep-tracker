@@ -22,13 +22,6 @@
   <div class="sb-top">
     <p class="eyebrow">CAT 2026</p>
     <div class="brand">Prep <span>Tracker</span></div>
-    <div class="cat-countdown">
-      <div class="cd-main">
-        <span class="cd-days" id="cd-days">—</span>
-        <span class="cd-unit">days</span>
-      </div>
-      <span class="cd-label">until CAT · Nov 29</span>
-    </div>
   </div>
 
   <!-- Signed-in user (Google profile pic + name) + Sign Out -->
@@ -62,6 +55,7 @@
     <button class="main-nav-btn active" id="mnav-quant" onclick="setPage('quant')"><span class="ico">📐</span>Quant Topics</button>
     <button class="main-nav-btn" id="mnav-daily" onclick="setPage('daily')"><span class="ico">📅</span>Daily Tasks</button>
     <button class="main-nav-btn" id="mnav-reading" onclick="setPage('reading')"><span class="ico">📖</span>Reading Log</button>
+    <button class="main-nav-btn" id="mnav-mocks" onclick="setPage('mocks')"><span class="ico">🎯</span>Mock Tests</button>
   </div>
 
   <!-- Quant section list (shown only on quant page) -->
@@ -209,6 +203,105 @@
             <div class="mh-head">This month</div>
             <div class="mh-grid" id="mh-grid"></div>
             <div class="mh-lbl">Less → More</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MOCK LOG PAGE ── -->
+  <div class="page" id="page-mocks">
+    <div class="ph">
+      <div class="ph-left">
+        <div class="ph-dot" style="background:#f472b6;box-shadow:0 0 8px #f472b640"></div>
+        <h1 class="ph-title">Mock Tests</h1>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <span style="font-size:13px;color:var(--muted)" id="mock-counter">0 / 40 attempted</span>
+      </div>
+    </div>
+
+    <!-- Summary cards row -->
+    <div class="mock-summary-row" id="mock-summary-row">
+      <div class="mock-sum-card"><div class="mock-sum-num" id="ms-attempted">0</div><div class="mock-sum-lbl">Attempted</div></div>
+      <div class="mock-sum-card"><div class="mock-sum-num" id="ms-best-scaled" style="color:#a78bfa">—</div><div class="mock-sum-lbl">Best Scaled</div></div>
+      <div class="mock-sum-card"><div class="mock-sum-num" id="ms-avg-scaled" style="color:#34d399">—</div><div class="mock-sum-lbl">Avg Scaled</div></div>
+      <div class="mock-sum-card"><div class="mock-sum-num" id="ms-best-pct" style="color:#f472b6">—</div><div class="mock-sum-lbl">Best %ile</div></div>
+      <div class="mock-sum-card"><div class="mock-sum-num" id="ms-trend" style="color:#fbbf24">—</div><div class="mock-sum-lbl">Trend (last 5)</div></div>
+    </div>
+
+    <div class="mock-layout">
+      <!-- Mock list -->
+      <div class="mock-list-col">
+        <div class="mock-list-head">
+          <span>All 40 Mocks</span>
+          <div style="display:flex;gap:6px">
+            <button class="mock-filter-btn active" onclick="setMockFilter('all',this)">All</button>
+            <button class="mock-filter-btn" onclick="setMockFilter('done',this)">Done</button>
+            <button class="mock-filter-btn" onclick="setMockFilter('pending',this)">Pending</button>
+          </div>
+        </div>
+        <div class="mock-list-scroll" id="mock-list-scroll"></div>
+      </div>
+
+      <!-- Entry / detail panel -->
+      <div class="mock-detail-col" id="mock-detail-col">
+        <div class="mock-detail-placeholder" id="mock-detail-placeholder">
+          <div style="font-size:32px;margin-bottom:10px">🎯</div>
+          <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px">Select a mock to log scores</div>
+          <div style="font-size:13px;color:var(--muted)">Click any mock on the left to enter your results.</div>
+        </div>
+        <div class="mock-entry-form" id="mock-entry-form" style="display:none">
+          <div class="mock-form-title" id="mock-form-title">Mock #1</div>
+          <div class="mock-form-date-row">
+            <label class="mf-label">Date attempted</label>
+            <input type="date" class="mf-date-input" id="mf-date">
+          </div>
+          <!-- Section inputs -->
+          <div class="mf-sections">
+            <div class="mf-section-block">
+              <div class="mf-sec-head" style="color:#38bdf8">VARC <span class="mf-sec-max">(24 Qs · max ~72)</span></div>
+              <div class="mf-input-row">
+                <div class="mf-field"><label>Correct</label><input type="number" class="mf-num" id="mf-varc-c" min="0" max="24" placeholder="0" oninput="calcMockScores()"></div>
+                <div class="mf-field"><label>Wrong</label><input type="number" class="mf-num" id="mf-varc-w" min="0" max="24" placeholder="0" oninput="calcMockScores()"></div>
+                <div class="mf-field mf-calc"><label>Raw Score</label><div class="mf-calc-val" id="mf-varc-raw">—</div></div>
+                <div class="mf-field mf-calc"><label>%ile (est)</label><div class="mf-calc-val" id="mf-varc-pct">—</div></div>
+              </div>
+            </div>
+            <div class="mf-section-block">
+              <div class="mf-sec-head" style="color:#fb923c">DILR <span class="mf-sec-max">(20 Qs · max ~60)</span></div>
+              <div class="mf-input-row">
+                <div class="mf-field"><label>Correct</label><input type="number" class="mf-num" id="mf-dilr-c" min="0" max="20" placeholder="0" oninput="calcMockScores()"></div>
+                <div class="mf-field"><label>Wrong</label><input type="number" class="mf-num" id="mf-dilr-w" min="0" max="20" placeholder="0" oninput="calcMockScores()"></div>
+                <div class="mf-field mf-calc"><label>Raw Score</label><div class="mf-calc-val" id="mf-dilr-raw">—</div></div>
+                <div class="mf-field mf-calc"><label>%ile (est)</label><div class="mf-calc-val" id="mf-dilr-pct">—</div></div>
+              </div>
+            </div>
+            <div class="mf-section-block">
+              <div class="mf-sec-head" style="color:#a78bfa">QA <span class="mf-sec-max">(32 Qs · max ~96)</span></div>
+              <div class="mf-input-row">
+                <div class="mf-field"><label>Correct</label><input type="number" class="mf-num" id="mf-qa-c" min="0" max="32" placeholder="0" oninput="calcMockScores()"></div>
+                <div class="mf-field"><label>Wrong</label><input type="number" class="mf-num" id="mf-qa-w" min="0" max="32" placeholder="0" oninput="calcMockScores()"></div>
+                <div class="mf-field mf-calc"><label>Raw Score</label><div class="mf-calc-val" id="mf-qa-raw">—</div></div>
+                <div class="mf-field mf-calc"><label>%ile (est)</label><div class="mf-calc-val" id="mf-qa-pct">—</div></div>
+              </div>
+            </div>
+          </div>
+          <!-- Total bar -->
+          <div class="mf-total-bar">
+            <div class="mf-total-item"><span class="mf-total-lbl">Total Raw</span><span class="mf-total-val" id="mf-total-raw">—</span></div>
+            <div class="mf-total-sep"></div>
+            <div class="mf-total-item"><span class="mf-total-lbl">Scaled /300</span><span class="mf-total-val" id="mf-total-scaled" style="color:#a78bfa;font-size:20px">—</span></div>
+            <div class="mf-total-sep"></div>
+            <div class="mf-total-item"><span class="mf-total-lbl">Est. Overall %ile</span><span class="mf-total-val" id="mf-total-pct" style="color:#f472b6;font-size:20px">—</span></div>
+          </div>
+          <!-- Notes -->
+          <div class="mf-notes-block">
+            <label class="mf-label">Notes / observations</label>
+            <textarea class="mf-textarea" id="mf-notes" placeholder="What went well? What to improve?"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button class="mock-save-btn" onclick="saveMockEntry()">💾 Save Mock</button>
           </div>
         </div>
       </div>
