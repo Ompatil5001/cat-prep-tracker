@@ -223,3 +223,146 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 .user-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .signout-btn{background:none;border:0.5px solid var(--border2);color:var(--muted);width:26px;height:26px;border-radius:7px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,border-color .15s}
 .signout-btn:hover{color:#f87171;border-color:#f8717144}
+
+/* ═══════════════════════════════════════
+   MOBILE RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  html, body { overflow: auto; }
+
+  /* ── Shell: stack sidebar on top of content ── */
+  .app {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    height: auto;
+    min-height: 100vh;
+    overflow: auto;
+  }
+
+  /* ── Sidebar becomes a compact top bar ── */
+  .sidebar {
+    border-right: none;
+    border-bottom: 0.5px solid var(--border2);
+    overflow: visible;
+  }
+
+  /* Hide sb-top brand on mobile (saves space) */
+  .sb-top { display: none; }
+
+  /* User row stays full width */
+  .user-row { padding: 10px 14px; }
+
+  /* Ring + stats row: horizontal, compact */
+  .ring-wrap {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  .ring-stats p { font-size: 12px; line-height: 1.7; }
+
+  /* Main nav: horizontal scrollable pill row */
+  .main-nav {
+    flex-direction: row;
+    gap: 6px;
+    padding: 8px 12px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .main-nav::-webkit-scrollbar { display: none; }
+  .main-nav-btn {
+    flex-shrink: 0;
+    padding: 7px 12px;
+    border-radius: 99px;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+
+  /* Hide quant section nav on mobile (use pill nav instead) */
+  .sec-nav { display: none; }
+
+  /* Hide backup row on mobile */
+  .backup-row { display: none; }
+
+  /* Footer: smaller */
+  .sb-footer { padding: 7px 14px; }
+  .reset-btn { font-size: 12px; padding: 3px 8px; }
+
+  /* ── Right panel ── */
+  .right {
+    overflow: auto;
+    height: auto;
+  }
+  .page { height: auto; overflow: visible; }
+  .page.active { display: flex; flex-direction: column; }
+
+  /* Panel header */
+  .ph { padding: 12px 14px 10px; flex-wrap: wrap; gap: 8px; }
+  .ph-title { font-size: 16px; }
+  .ph-pills { flex-wrap: wrap; gap: 5px; }
+  .action-btn { font-size: 12px; padding: 5px 10px; }
+
+  /* Progress row */
+  .prog-row { padding: 8px 14px; }
+
+  /* Topics grid: 1 column on mobile */
+  .topics-wrap { padding: 10px 12px; overflow: visible; }
+  .topics-grid { grid-template-columns: 1fr 1fr; gap: 5px; }
+
+  /* ── Daily tasks: stack calendar above day detail ── */
+  .daily-layout {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
+    overflow: visible;
+    height: auto;
+  }
+  .cal-side {
+    border-right: none;
+    border-bottom: 0.5px solid var(--border);
+    overflow: visible;
+  }
+  .cal-wrap { overflow: visible; padding: 0 12px 10px; }
+  .cal-nav { padding: 10px 14px 8px; }
+  .streak-bar {
+    gap: 10px;
+    padding: 8px 14px;
+    flex-wrap: wrap;
+  }
+  .streak-item { font-size: 12px; }
+
+  .day-side { overflow: visible; }
+  .tasks-scroll { overflow: visible; padding: 10px 12px; }
+  .day-prog { padding: 8px 12px; }
+
+  /* Quant grid in daily tasks: 5 columns → 4 */
+  .task-items [style*="grid-template-columns:repeat(4"] {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+
+  /* ── Reading log: stack main above sidebar ── */
+  .reading-layout {
+    grid-template-columns: 1fr;
+    overflow: visible;
+    height: auto;
+  }
+  .reading-main {
+    border-right: none;
+    border-bottom: 0.5px solid var(--border);
+    overflow: visible;
+  }
+  .reading-scroll { overflow: visible; padding: 12px; }
+  .entry-row { flex-direction: column; }
+
+  .reading-sidebar { overflow: visible; }
+  .rs-scroll { overflow: visible; padding: 10px 12px; }
+
+  /* Stats row: 3 across */
+  .rs-stat { padding: 10px; }
+  .rs-stat-num { font-size: 18px; }
+}
+
+/* Extra small screens */
+@media (max-width: 380px) {
+  .topics-grid { grid-template-columns: 1fr; }
+  .streak-bar { flex-direction: column; align-items: flex-start; gap: 6px; }
+}
