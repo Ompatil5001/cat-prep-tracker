@@ -39,8 +39,11 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 .main-nav-btn .ico{font-size:15px;width:20px;text-align:center}
 
 /* quant section nav */
-.sec-nav{flex:1;overflow-y:auto;padding:8px 8px;scrollbar-width:none}
+.sec-nav{overflow-y:auto;padding:8px 8px;scrollbar-width:none}
 .sec-nav::-webkit-scrollbar{display:none}
+
+/* spacer — grows to fill sidebar when sec-nav is hidden, keeps bottom controls pinned */
+.sb-spacer{flex:1}
 .nav-tab{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;cursor:pointer;margin-bottom:3px;transition:background .15s;border:0.5px solid transparent;user-select:none}
 .nav-tab:hover{background:var(--surface)}
 .nav-tab.active{background:var(--surface);border-color:var(--border2)}
@@ -224,8 +227,9 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 .user-avatar{width:30px;height:30px;border-radius:50%;flex-shrink:0;background:var(--surface2);border:0.5px solid var(--border2);object-fit:cover}
 .user-info{flex:1;min-width:0}
 .user-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.signout-btn{background:none;border:0.5px solid var(--border2);color:var(--muted);width:26px;height:26px;border-radius:7px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,border-color .15s}
-.signout-btn:hover{color:#f87171;border-color:#f8717144}
+.signout-btn{background:none;border:0.5px solid var(--border2);color:var(--muted);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:color .15s,border-color .15s,background .15s;padding:0}
+.signout-btn:hover{color:#f87171;border-color:#f8717144;background:rgba(248,113,113,0.07)}
+.signout-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
 /* ═══════════════════════════════════════
    MOBILE RESPONSIVE

@@ -28,7 +28,9 @@
   <div class="user-row" id="user-row">
     <img class="user-avatar" id="user-avatar" src="" alt="" referrerpolicy="no-referrer">
     <div class="user-info"><p class="user-name" id="user-name">Signed in</p></div>
-    <button class="signout-btn" id="signout-btn" onclick="signOutUser()" title="Sign out">⏻</button>
+    <button class="signout-btn" id="signout-btn" onclick="signOutUser()" title="Sign out">
+      <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+    </button>
   </div>
 
   <div class="ring-wrap">
@@ -57,6 +59,9 @@
 
   <!-- Quant section list (shown only on quant page) -->
   <nav class="sec-nav" id="sec-nav"></nav>
+
+  <!-- Spacer — pushes backup/footer to bottom always -->
+  <div class="sb-spacer"></div>
 
   <div class="backup-row">
     <button class="reset-btn" onclick="exportBackup()" title="Download a backup JSON file">⬇ Backup</button>
