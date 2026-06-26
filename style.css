@@ -19,6 +19,11 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 .sidebar{background:var(--sidebar);border-right:0.5px solid var(--border2);display:flex;flex-direction:column;overflow:hidden}
 .sb-top{padding:18px 16px 14px;border-bottom:0.5px solid var(--border)}
 .eyebrow{font-size:13px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.cat-countdown{margin-top:10px;padding:9px 11px;background:var(--faint);border:0.5px solid var(--border2);border-radius:9px;display:flex;flex-direction:column;gap:2px}
+.cd-main{display:flex;align-items:baseline;gap:4px}
+.cd-days{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;background:linear-gradient(90deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.cd-unit{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+.cd-label{font-size:11px;color:var(--muted);letter-spacing:.05em}
 .brand{font-family:'Sora',sans-serif;font-size:17px;font-weight:700}
 .brand span{background:linear-gradient(90deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
@@ -105,21 +110,21 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 
 /* Calendar side */
 .cal-side{display:flex;flex-direction:column;overflow:hidden;border-right:0.5px solid var(--border)}
-.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px;flex-shrink:0}
-.cal-month{font-family:'Sora',sans-serif;font-size:14px;font-weight:700}
-.cal-arrow{background:none;border:0.5px solid var(--border2);color:var(--muted);width:24px;height:24px;border-radius:6px;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:color .15s}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 10px;flex-shrink:0}
+.cal-month{font-family:'Sora',sans-serif;font-size:16px;font-weight:700}
+.cal-arrow{background:none;border:0.5px solid var(--border2);color:var(--muted);width:28px;height:28px;border-radius:7px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:color .15s}
 .cal-arrow:hover{color:var(--text)}
-.cal-wrap{flex:1;overflow-y:auto;padding:0 13px 10px;scrollbar-width:thin;scrollbar-color:var(--faint) transparent}
-.cal-days-header{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:4px}
-.cal-day-lbl{text-align:center;font-size:11px;color:var(--muted);padding:3px 0;font-weight:500}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.cal-cell{aspect-ratio:1;border-radius:7px;border:0.5px solid var(--border);background:var(--surface);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:border-color .15s,background .15s;position:relative;padding:3px}
+.cal-wrap{flex:1;overflow-y:auto;padding:0 16px 12px;scrollbar-width:thin;scrollbar-color:var(--faint) transparent}
+.cal-days-header{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
+.cal-day-lbl{text-align:center;font-size:13px;color:var(--muted);padding:4px 0;font-weight:500}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.cal-cell{aspect-ratio:1;border-radius:9px;border:0.5px solid var(--border);background:var(--surface);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:border-color .15s,background .15s;position:relative;padding:4px}
 .cal-cell:hover{border-color:var(--border2);background:var(--surface2)}
 .cal-cell.empty{background:transparent;border-color:transparent;cursor:default}
 .cal-cell.today{border-color:rgba(167,139,250,0.5)}
 .cal-cell.selected{border-color:#a78bfa;background:rgba(167,139,250,0.1)}
 .cal-cell.has-data .dot-row{opacity:1}
-.cal-num{font-size:12px;font-weight:500;color:var(--text)}
+.cal-num{font-size:13px;font-weight:500;color:var(--text)}
 .cal-cell.empty .cal-num{color:transparent}
 .dot-row{display:flex;gap:2px;opacity:0;transition:opacity .2s}
 .dot{width:4px;height:4px;border-radius:50%}

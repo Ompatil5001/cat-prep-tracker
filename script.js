@@ -212,6 +212,7 @@ function importBackupFile(file){
 /* ── Page nav ── */
 function setPage(p){
   currentPage=p;
+  localStorage.setItem('cat_page',p);
   document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));
   document.getElementById("page-"+p).classList.add("active");
   document.querySelectorAll(".main-nav-btn").forEach(el=>el.classList.remove("active"));
@@ -547,11 +548,9 @@ function updateCountdown(){
   const now=new Date();
   const diff=exam-now;
   const el=document.getElementById('cd-days');
-  const days=diff>0?Math.ceil(diff/(1000*60*60*24)):0;
-  if(el)el.textContent=diff<=0?'🎯':days;
-  // mobile fallback: ring-stats shows a compact line since sb-top is hidden
-  const rs=document.querySelector('.ring-stats');
-  if(rs)rs.dataset.cd=days>0?days+' days to CAT':'CAT is today!';
+  if(!el)return;
+  if(diff<=0){el.textContent='🎯';return;}
+  el.textContent=Math.ceil(diff/(1000*60*60*24));
 }
 
 /* ── INIT ── */
@@ -562,9 +561,10 @@ function updateCountdown(){
   renderNav();
   updatePanel();
   updateGlobal();
-  setPage("quant");
+  const savedPage=localStorage.getItem('cat_page');
+  setPage(savedPage&&['quant','daily','reading'].includes(savedPage)?savedPage:'quant');
   _setSaveStatus("Loaded",false);
   updateCountdown();
-  setInterval(updateCountdown,60*60*1000); // refresh every hour
+  setInterval(updateCountdown,60*60*1000);
   _cloudInit();
 })();
