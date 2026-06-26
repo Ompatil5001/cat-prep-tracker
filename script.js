@@ -541,6 +541,19 @@ function renderReadingLog(){
   document.getElementById("mh-grid").innerHTML=hm;
 }
 
+/* ── CAT Exam Countdown ── */
+function updateCountdown(){
+  const exam=new Date('2026-11-29T00:00:00');
+  const now=new Date();
+  const diff=exam-now;
+  const el=document.getElementById('cd-days');
+  const days=diff>0?Math.ceil(diff/(1000*60*60*24)):0;
+  if(el)el.textContent=diff<=0?'🎯':days;
+  // mobile fallback: ring-stats shows a compact line since sb-top is hidden
+  const rs=document.querySelector('.ring-stats');
+  if(rs)rs.dataset.cd=days>0?days+' days to CAT':'CAT is today!';
+}
+
 /* ── INIT ── */
 (async function init(){
   const now=new Date();
@@ -551,5 +564,7 @@ function renderReadingLog(){
   updateGlobal();
   setPage("quant");
   _setSaveStatus("Loaded",false);
+  updateCountdown();
+  setInterval(updateCountdown,60*60*1000); // refresh every hour
   _cloudInit();
 })();

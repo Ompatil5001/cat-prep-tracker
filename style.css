@@ -18,7 +18,11 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 /* ── Sidebar ── */
 .sidebar{background:var(--sidebar);border-right:0.5px solid var(--border2);display:flex;flex-direction:column;overflow:hidden}
 .sb-top{padding:18px 16px 14px;border-bottom:0.5px solid var(--border)}
-.eyebrow{font-size:13px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.cat-countdown{margin-top:10px;padding:9px 11px;background:var(--faint);border:0.5px solid var(--border2);border-radius:9px;display:flex;flex-direction:column;gap:2px}
+.cd-main{display:flex;align-items:baseline;gap:4px}
+.cd-days{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;background:linear-gradient(90deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1}
+.cd-unit{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
+.cd-label{font-size:11px;color:var(--muted);letter-spacing:.05em}
 .brand{font-family:'Sora',sans-serif;font-size:17px;font-weight:700}
 .brand span{background:linear-gradient(90deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
@@ -256,6 +260,8 @@ html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:
 
   /* Hide sb-top brand on mobile (saves space) */
   .sb-top { display: none; }
+  /* Show a compact countdown row in ring-stats since sb-top is hidden */
+  .ring-stats::after{content:attr(data-cd);display:block;font-size:12px;color:var(--muted);margin-top:2px}
 
   /* User row stays full width */
   .user-row { padding: 10px 14px; }
