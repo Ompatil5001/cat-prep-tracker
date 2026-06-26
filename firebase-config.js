@@ -23,3 +23,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
+
+// Keep the signed-in user logged in across browser restarts/tabs.
+// (This is actually Firebase's web default already — set explicitly so
+// the behavior is documented here instead of relying on a default.)
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+  .catch(e => console.warn("Auth persistence setup failed", e));

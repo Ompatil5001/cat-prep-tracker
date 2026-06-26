@@ -102,33 +102,34 @@ function loadAll(){
   }
 }
 
-/* ── Cloud backup (Firebase, anonymous — no login) ──
-   Mirrors the same data into a private cloud document so a cleared
-   cache, browser glitch, or storage wipe doesn't lose everything.
-   Firebase quietly assigns this browser an anonymous ID (no sign-in
-   screen) and that ID is the only thing that can read/write its own
-   cloud copy — enforced by the Firestore rules, not by this code.
+/* ── Cloud sync (Firebase, Google Sign-In) ──
+   Mirrors the same data into a private cloud document keyed by the
+   signed-in user's UID, so the same Google account on a different
+   device (or a cleared cache on this one) doesn't lose anything.
 
-   Honest limit: a full "clear ALL browsing data" wipe can remove that
-   anonymous ID too, same as it would clear localStorage. This protects
-   against most accidental/partial data loss, but it is NOT a substitute
-   for moving data between devices — keep using the Backup/Restore JSON
-   buttons for that.
+   Sign-in itself happens on login.html (see login.js); the guard in
+   auth.js makes sure this page is only reached once a user exists.
+   The listener below just picks up that user's uid and wires it into
+   the existing _cloudPush()/_cloudPullIfNeeded() functions — nothing
+   else about cloud sync changed. Reads/writes are restricted to that
+   uid's own document by the Firestore rules, not by this code.
 */
 let _cloudReady=false;
 let _uid=null;
 
 function _cloudInit(){
   if(typeof auth==="undefined"){
-    console.warn("Firebase not configured — cloud backup disabled. Fill in firebase-config.js.");
+    console.warn("Firebase not configured — cloud sync disabled. Fill in firebase-config.js.");
     return;
   }
-  auth.signInAnonymously().catch(e=>{
-    console.error("Anonymous sign-in failed",e);
-    _setSaveStatus("Cloud backup unavailable",true);
-  });
   auth.onAuthStateChanged(async user=>{
-    if(!user)return;
+    if(!user){
+      // Defense in depth: auth.js already guards this page, but if it's
+      // ever reached while signed out, send back to login instead of
+      // silently running with no cloud sync.
+      window.location.replace("login.html");
+      return;
+    }
     _uid=user.uid;
     _cloudReady=true;
     await _cloudPullIfNeeded();

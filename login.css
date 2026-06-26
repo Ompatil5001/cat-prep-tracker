@@ -1,0 +1,50 @@
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#08090d;--surface:#111318;--surface2:#161922;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0f2f7;--muted:#6b7290;--faint:#1e2335;
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text)}
+
+/* ── full-screen loading state, shown while we check for an existing session ── */
+.login-loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:10}
+.spinner{width:30px;height:30px;border-radius:50%;border:2.5px solid var(--faint);border-top-color:#a78bfa;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── centered card ── */
+.login-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  width:100%;max-width:380px;background:var(--surface);
+  border:0.5px solid var(--border2);border-radius:18px;
+  padding:36px 30px 30px;
+  box-shadow:0 20px 60px rgba(0,0,0,0.45);
+}
+.login-logo{display:flex;align-items:center;gap:9px;margin-bottom:18px}
+.logo-mark{font-size:22px}
+.brand{font-family:'Sora',sans-serif;font-size:19px;font-weight:700;color:var(--text)}
+.brand span{background:linear-gradient(90deg,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.login-eyebrow{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:14px}
+.login-title{font-family:'Sora',sans-serif;font-size:22px;font-weight:700;margin-bottom:8px}
+.login-sub{font-size:13.5px;color:var(--muted);line-height:1.55;margin-bottom:26px}
+
+.google-btn{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;background:#fff;color:#1f1f1f;border:none;
+  border-radius:10px;padding:12px 16px;font-size:14px;font-weight:600;
+  font-family:'Inter',sans-serif;cursor:pointer;
+  transition:opacity .15s,transform .1s;
+}
+.google-btn:hover{opacity:.9}
+.google-btn:active{transform:scale(.99)}
+.google-btn:disabled{opacity:.6;cursor:default}
+.google-btn.loading .g-icon{animation:spin .8s linear infinite}
+
+.login-status{font-size:12.5px;color:var(--muted);margin-top:16px;min-height:16px}
+.login-status.error{color:#fb923c}
+
+/* ── responsive ── */
+@media (max-width:480px){
+  .login-card{padding:28px 22px 24px;border-radius:14px}
+  .login-title{font-size:19px}
+}
