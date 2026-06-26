@@ -71,6 +71,7 @@ function _doSaveAll(){
       q:qState,daily:dailyData,read:readingData,savedAt:new Date().toISOString()
     }));
     _setSaveStatus("Saved ✓",false);
+    _cloudPush();
   }catch(e){
     console.error("saveAll failed",e);
     _setSaveStatus("Save failed",true);
@@ -98,6 +99,74 @@ function loadAll(){
     }
   }catch(e){
     console.error("loadAll failed",e);
+  }
+}
+
+/* ── Cloud backup (Firebase, anonymous — no login) ──
+   Mirrors the same data into a private cloud document so a cleared
+   cache, browser glitch, or storage wipe doesn't lose everything.
+   Firebase quietly assigns this browser an anonymous ID (no sign-in
+   screen) and that ID is the only thing that can read/write its own
+   cloud copy — enforced by the Firestore rules, not by this code.
+
+   Honest limit: a full "clear ALL browsing data" wipe can remove that
+   anonymous ID too, same as it would clear localStorage. This protects
+   against most accidental/partial data loss, but it is NOT a substitute
+   for moving data between devices — keep using the Backup/Restore JSON
+   buttons for that.
+*/
+let _cloudReady=false;
+let _uid=null;
+
+function _cloudInit(){
+  if(typeof auth==="undefined"){
+    console.warn("Firebase not configured — cloud backup disabled. Fill in firebase-config.js.");
+    return;
+  }
+  auth.signInAnonymously().catch(e=>{
+    console.error("Anonymous sign-in failed",e);
+    _setSaveStatus("Cloud backup unavailable",true);
+  });
+  auth.onAuthStateChanged(async user=>{
+    if(!user)return;
+    _uid=user.uid;
+    _cloudReady=true;
+    await _cloudPullIfNeeded();
+  });
+}
+
+async function _cloudPullIfNeeded(){
+  // Only pull from the cloud if this browser looks empty (e.g. storage was wiped).
+  // Otherwise local data wins, and the next save just refreshes the cloud copy.
+  const looksEmpty=!localStorage.getItem(LS_KEYS.q)&&!localStorage.getItem(LS_KEYS.daily)&&
+                    !localStorage.getItem(LS_KEYS.read)&&!localStorage.getItem(LS_BACKUP_KEY);
+  if(!looksEmpty)return;
+  try{
+    const doc=await db.collection("trackers").doc(_uid).get();
+    if(doc.exists){
+      const p=doc.data();
+      if(p.q)Object.keys(p.q).forEach(k=>{if(k in qState)qState[k]=p.q[k];});
+      if(p.daily)dailyData=p.daily;
+      if(p.read)readingData=p.read;
+      _doSaveAll();
+      renderNav();updatePanel();updateGlobal();
+      if(currentPage==="daily")renderCalendar();
+      if(currentPage==="reading")renderReadingLog();
+      _setSaveStatus("Restored from cloud ✓",false);
+    }
+  }catch(e){
+    console.error("cloud pull failed",e);
+  }
+}
+
+async function _cloudPush(){
+  if(!_cloudReady||!_uid)return;
+  try{
+    await db.collection("trackers").doc(_uid).set({
+      q:qState,daily:dailyData,read:readingData,savedAt:new Date().toISOString()
+    });
+  }catch(e){
+    console.error("cloud push failed",e);
   }
 }
 
@@ -469,4 +538,5 @@ function renderReadingLog(){
   updateGlobal();
   setPage("quant");
   _setSaveStatus("Loaded",false);
+  _cloudInit();
 })();
