@@ -144,33 +144,11 @@ function _cloudInit(){
 }
 
 async function _cloudPullIfNeeded(){
-  // Always pull from Firestore on every login — Firestore is the source of truth.
-  // Removed the old "looksEmpty" guard which was preventing cross-device sync:
-  // once mobile had any localStorage data it would never fetch updates from PC.
-  try{
-    const doc=await db.collection("trackers").doc(_uid).get();
-    if(doc.exists){
-      const p=doc.data();
-      if(p.q)Object.keys(p.q).forEach(k=>{if(k in qState)qState[k]=p.q[k];});
-      if(p.daily)dailyData=p.daily;
-      if(p.read)readingData=p.read;
-      if(p.mocks)mockData=p.mocks;
-      // Save to localStorage only — skip _cloudPush to avoid a redundant write
-      localStorage.setItem(LS_KEYS.q,JSON.stringify(qState));
-      localStorage.setItem(LS_KEYS.daily,JSON.stringify(dailyData));
-      localStorage.setItem(LS_KEYS.read,JSON.stringify(readingData));
-      localStorage.setItem(LS_KEYS.mocks,JSON.stringify(mockData));
-      renderNav();updatePanel();updateGlobal();
-      if(currentPage==="daily")renderCalendar();
-      if(currentPage==="reading")renderReadingLog();
-      if(currentPage==="mocks")renderMockPage();
-      _setSaveStatus("Synced ✓",false);
-    }
-  }catch(e){
-    console.error("cloud pull failed",e);
-    _setSaveStatus("Sync failed — check connection",true);
-  }
-}
+  // Only pull from the cloud if this browser looks empty (e.g. storage was wiped).
+  // Otherwise local data wins, and the next save just refreshes the cloud copy.
+  const looksEmpty=!localStorage.getItem(LS_KEYS.q)&&!localStorage.getItem(LS_KEYS.daily)&&
+                    !localStorage.getItem(LS_KEYS.read)&&!localStorage.getItem(LS_BACKUP_KEY);
+  if(!looksEmpty)return;
   try{
     const doc=await db.collection("trackers").doc(_uid).get();
     if(doc.exists){
@@ -244,7 +222,6 @@ function importBackupFile(file){
 /* ── Page nav ── */
 function setPage(p){
   currentPage=p;
-  localStorage.setItem('cat_active_page', p);  // persist across reloads
   document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));
   document.getElementById("page-"+p).classList.add("active");
   document.querySelectorAll(".main-nav-btn").forEach(el=>el.classList.remove("active"));
@@ -830,10 +807,8 @@ function renderMockList(){
   renderNav();
   updatePanel();
   updateGlobal();
-  // Restore last active page, countdown, then cloud sync
-  const saved=localStorage.getItem('cat_active_page');
-  setPage(saved&&['quant','daily','reading','mocks'].includes(saved)?saved:'quant');
-  // Countdown — updates every hour
+  setPage("quant");
+  // ── Countdown ──
   function updateCountdown(){
     const diff=new Date('2026-11-29T00:00:00')-new Date();
     const el=document.getElementById('cd-days');
