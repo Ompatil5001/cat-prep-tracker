@@ -144,11 +144,9 @@ function _cloudInit(){
 }
 
 async function _cloudPullIfNeeded(){
-  // Only pull from the cloud if this browser looks empty (e.g. storage was wiped).
-  // Otherwise local data wins, and the next save just refreshes the cloud copy.
-  const looksEmpty=!localStorage.getItem(LS_KEYS.q)&&!localStorage.getItem(LS_KEYS.daily)&&
-                    !localStorage.getItem(LS_KEYS.read)&&!localStorage.getItem(LS_BACKUP_KEY);
-  if(!looksEmpty)return;
+  // Always pull from Firestore on login — it's the source of truth.
+  // Removed looksEmpty guard: it was blocking cross-device sync because
+  // once mobile had any localStorage data it would never fetch updates from PC.
   try{
     const doc=await db.collection("trackers").doc(_uid).get();
     if(doc.exists){
@@ -157,15 +155,20 @@ async function _cloudPullIfNeeded(){
       if(p.daily)dailyData=p.daily;
       if(p.read)readingData=p.read;
       if(p.mocks)mockData=p.mocks;
-      _doSaveAll();
+      // Write to localStorage only — no cloud push needed (data just came from there)
+      localStorage.setItem(LS_KEYS.q,JSON.stringify(qState));
+      localStorage.setItem(LS_KEYS.daily,JSON.stringify(dailyData));
+      localStorage.setItem(LS_KEYS.read,JSON.stringify(readingData));
+      localStorage.setItem(LS_KEYS.mocks,JSON.stringify(mockData));
       renderNav();updatePanel();updateGlobal();
       if(currentPage==="daily")renderCalendar();
       if(currentPage==="reading")renderReadingLog();
       if(currentPage==="mocks")renderMockList();
-      _setSaveStatus("Restored from cloud ✓",false);
+      _setSaveStatus("Synced ✓",false);
     }
   }catch(e){
     console.error("cloud pull failed",e);
+    _setSaveStatus("Sync failed — check connection",true);
   }
 }
 
@@ -222,6 +225,7 @@ function importBackupFile(file){
 /* ── Page nav ── */
 function setPage(p){
   currentPage=p;
+  localStorage.setItem('cat_active_page',p);
   document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));
   document.getElementById("page-"+p).classList.add("active");
   document.querySelectorAll(".main-nav-btn").forEach(el=>el.classList.remove("active"));
@@ -807,7 +811,8 @@ function renderMockList(){
   renderNav();
   updatePanel();
   updateGlobal();
-  setPage("quant");
+  const saved=localStorage.getItem('cat_active_page');
+  setPage(saved&&['quant','daily','reading','mocks'].includes(saved)?saved:'quant');
   // ── Countdown ──
   function updateCountdown(){
     const diff=new Date('2026-11-29T00:00:00')-new Date();
