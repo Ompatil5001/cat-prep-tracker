@@ -256,7 +256,10 @@
           <div style="font-size:13px;color:var(--muted)">Click any mock on the left to enter your results.</div>
         </div>
         <div class="mock-entry-form" id="mock-entry-form" style="display:none">
-          <div class="mock-form-title" id="mock-form-title">Mock #1</div>
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:2px">
+            <button class="mock-back-btn" id="mock-back-btn" onclick="closeMockForm()" style="display:none">← Back</button>
+            <div class="mock-form-title" id="mock-form-title">Mock #1</div>
+          </div>
           <div class="mock-form-date-row">
             <label class="mf-label">Date attempted</label>
             <input type="date" class="mf-date-input" id="mf-date">

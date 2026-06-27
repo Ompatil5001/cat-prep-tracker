@@ -233,7 +233,14 @@ function setPage(p){
   document.getElementById("sec-nav").style.display=p==="quant"?"block":"none";
   if(p==="daily") renderCalendar();
   if(p==="reading") renderReadingLog();
-  if(p==="mocks") renderMockList();
+  if(p==="mocks"){
+    activeMockNum=null;
+    renderMockList();
+    if(_isMobile()){
+      document.querySelector(".mock-list-col").classList.remove("mob-hidden");
+      document.querySelector(".mock-detail-col").classList.add("mob-hidden");
+    }
+  }
 }
 
 /* ══════════════════════════════════
@@ -660,6 +667,8 @@ function calcMockScores(){
   }
 }
 
+function _isMobile(){ return window.innerWidth<=768; }
+
 function openMockForm(num){
   activeMockNum=num;
   document.getElementById("mock-detail-placeholder").style.display="none";
@@ -682,6 +691,20 @@ function openMockForm(num){
   document.querySelectorAll(".mock-row").forEach(r=>r.classList.remove("active"));
   const row=document.getElementById("mock-row-"+num);
   if(row)row.classList.add("active");
+
+  // mobile: hide list, show form; show back button
+  if(_isMobile()){
+    document.getElementById("mock-list-col") && document.querySelector(".mock-list-col").classList.add("mob-hidden");
+    document.querySelector(".mock-detail-col").classList.remove("mob-hidden");
+    document.getElementById("mock-back-btn").style.display="block";
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
+}
+
+function closeMockForm(){
+  // mobile only: go back to list
+  document.querySelector(".mock-list-col").classList.remove("mob-hidden");
+  document.querySelector(".mock-detail-col").classList.add("mob-hidden");
 }
 
 function saveMockEntry(){
@@ -716,6 +739,11 @@ function setMockFilter(f,btn){
 }
 
 function renderMockList(){
+  // on mobile, reset to list view when re-rendering (filter change etc.)
+  if(_isMobile()&&!activeMockNum){
+    document.querySelector(".mock-list-col").classList.remove("mob-hidden");
+    document.querySelector(".mock-detail-col").classList.add("mob-hidden");
+  }
   const attempted=Object.keys(mockData).length;
   document.getElementById("mock-counter").textContent=`${attempted} / 40 attempted`;
   document.getElementById("ms-attempted").textContent=attempted;
