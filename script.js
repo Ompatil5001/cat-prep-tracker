@@ -144,11 +144,9 @@ function _cloudInit(){
 }
 
 async function _cloudPullIfNeeded(){
-  // Only pull from the cloud if this browser looks empty (e.g. storage was wiped).
-  // Otherwise local data wins, and the next save just refreshes the cloud copy.
-  const looksEmpty=!localStorage.getItem(LS_KEYS.q)&&!localStorage.getItem(LS_KEYS.daily)&&
-                    !localStorage.getItem(LS_KEYS.read)&&!localStorage.getItem(LS_BACKUP_KEY);
-  if(!looksEmpty)return;
+  // Always pull from Firestore on login — Firestore is the source of truth.
+  // The old "looksEmpty" guard was preventing cross-device sync: once mobile
+  // had any localStorage data it would never fetch updates made on PC.
   try{
     const doc=await db.collection("trackers").doc(_uid).get();
     if(doc.exists){
@@ -157,15 +155,20 @@ async function _cloudPullIfNeeded(){
       if(p.daily)dailyData=p.daily;
       if(p.read)readingData=p.read;
       if(p.mocks)mockData=p.mocks;
-      _doSaveAll();
+      // Write to localStorage only — skip _cloudPush to avoid a redundant write
+      localStorage.setItem(LS_KEYS.q,JSON.stringify(qState));
+      localStorage.setItem(LS_KEYS.daily,JSON.stringify(dailyData));
+      localStorage.setItem(LS_KEYS.read,JSON.stringify(readingData));
+      localStorage.setItem(LS_KEYS.mock,JSON.stringify(mockData));
       renderNav();updatePanel();updateGlobal();
       if(currentPage==="daily")renderCalendar();
       if(currentPage==="reading")renderReadingLog();
       if(currentPage==="mocks")renderMockList();
-      _setSaveStatus("Restored from cloud ✓",false);
+      _setSaveStatus("Synced ✓",false);
     }
   }catch(e){
     console.error("cloud pull failed",e);
+    _setSaveStatus("Sync failed — check connection",true);
   }
 }
 
