@@ -144,9 +144,9 @@ function _cloudInit(){
 }
 
 async function _cloudPullIfNeeded(){
-  // Always pull from Firestore on login — Firestore is the source of truth.
-  // The old "looksEmpty" guard was preventing cross-device sync: once mobile
-  // had any localStorage data it would never fetch updates made on PC.
+  // Always pull from Firestore on every login — Firestore is the source of truth.
+  // Removed the old "looksEmpty" guard which was preventing cross-device sync:
+  // once mobile had any localStorage data it would never fetch updates from PC.
   try{
     const doc=await db.collection("trackers").doc(_uid).get();
     if(doc.exists){
@@ -155,20 +155,39 @@ async function _cloudPullIfNeeded(){
       if(p.daily)dailyData=p.daily;
       if(p.read)readingData=p.read;
       if(p.mocks)mockData=p.mocks;
-      // Write to localStorage only — skip _cloudPush to avoid a redundant write
+      // Save to localStorage only — skip _cloudPush to avoid a redundant write
       localStorage.setItem(LS_KEYS.q,JSON.stringify(qState));
       localStorage.setItem(LS_KEYS.daily,JSON.stringify(dailyData));
       localStorage.setItem(LS_KEYS.read,JSON.stringify(readingData));
-      localStorage.setItem(LS_KEYS.mock,JSON.stringify(mockData));
+      localStorage.setItem(LS_KEYS.mocks,JSON.stringify(mockData));
       renderNav();updatePanel();updateGlobal();
       if(currentPage==="daily")renderCalendar();
       if(currentPage==="reading")renderReadingLog();
-      if(currentPage==="mocks")renderMockList();
+      if(currentPage==="mocks")renderMockPage();
       _setSaveStatus("Synced ✓",false);
     }
   }catch(e){
     console.error("cloud pull failed",e);
     _setSaveStatus("Sync failed — check connection",true);
+  }
+}
+  try{
+    const doc=await db.collection("trackers").doc(_uid).get();
+    if(doc.exists){
+      const p=doc.data();
+      if(p.q)Object.keys(p.q).forEach(k=>{if(k in qState)qState[k]=p.q[k];});
+      if(p.daily)dailyData=p.daily;
+      if(p.read)readingData=p.read;
+      if(p.mocks)mockData=p.mocks;
+      _doSaveAll();
+      renderNav();updatePanel();updateGlobal();
+      if(currentPage==="daily")renderCalendar();
+      if(currentPage==="reading")renderReadingLog();
+      if(currentPage==="mocks")renderMockList();
+      _setSaveStatus("Restored from cloud ✓",false);
+    }
+  }catch(e){
+    console.error("cloud pull failed",e);
   }
 }
 
@@ -225,6 +244,7 @@ function importBackupFile(file){
 /* ── Page nav ── */
 function setPage(p){
   currentPage=p;
+  localStorage.setItem('cat_active_page', p);  // persist across reloads
   document.querySelectorAll(".page").forEach(el=>el.classList.remove("active"));
   document.getElementById("page-"+p).classList.add("active");
   document.querySelectorAll(".main-nav-btn").forEach(el=>el.classList.remove("active"));
@@ -810,7 +830,17 @@ function renderMockList(){
   renderNav();
   updatePanel();
   updateGlobal();
-  setPage("quant");
+  // Restore last active page, countdown, then cloud sync
+  const saved=localStorage.getItem('cat_active_page');
+  setPage(saved&&['quant','daily','reading','mocks'].includes(saved)?saved:'quant');
+  // Countdown — updates every hour
+  function updateCountdown(){
+    const diff=new Date('2026-11-29T00:00:00')-new Date();
+    const el=document.getElementById('cd-days');
+    if(el) el.textContent=diff>0?Math.ceil(diff/864e5):'🎯';
+  }
+  updateCountdown();
+  setInterval(updateCountdown,36e5);
   _setSaveStatus("Loaded",false);
   _cloudInit();
 })();
